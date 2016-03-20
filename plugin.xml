@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- NR: id 比较关键，1. 区分你的 plugin 的名字 2. 当要删除该 plugin 的时候需要指定改名字 -->
+
+<plugin id="org.kane.plugin.hello" version="0.0.1" 
+        xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- name and description for publication of your plugin and made the people knows your plugins -->    
+    <name>HelloWorld</name>
+    <description>Description</description>
+    
+    <js-module src="www/HelloWorld.js" name="HelloWorld"> <!-- name 可以随便取，但要和后面的 feature name 吻合 -->
+    
+        <clobbers target="hello"/>
+        
+        <!-- NR( Need Record ):
+        	 The clobbers tag indicates that the module shall be inserted into the window object as Alert, 
+        	 so your MAF app code should call the JavaScript method Alert.alert to execute the plugin’s alert method -->
+        <!-- 简而言之，clobber target 就是告诉 js 如何调用 java bridged object -->
+        	 
+    </js-module>
+    
+    <platform name="android">
+    
+        <config-file parent="/*" target="res/xml/config.xml">
+        
+            <feature name="HelloWorld"> <!-- feature name 要和 js-module name 要吻合 -->
+            
+                <param name="android-package" value="org.kane.plugin.hello.HelloWorld"/>
+                
+            </feature>
+            
+        </config-file>
+        
+        <!-- source-file 是 plugin 工程中的 java 源文件，target-dir 是 cordova 工程中的路径 -->
+        <source-file src="src/android/org/kane/plugin/hello/HelloWorld.java" target-dir="src/org/kane/plugin/hello"/>
+        
+        <!-- NR: 这里要着重强调一下，网上大多数的例子均是按照如下的方式来进行的配置
+        	 
+        	 1. <source-file src="src/android/HelloWorld.java" target-dir="src/org/kane/plugin"/>
+        	 	这样的话，在执行 cordova add plugin 的时候，找不到 HelloWorld.java，因为包名不匹配，正确的路径是 src/android/org/kane/plugin/
+        	 	
+        	 2. 所以，我猜测，是不是在 cordova 安装 plugin 的时候，会自动修改包名？
+        	    于是，我更改了 HelloWorld.java，将其包名改为了 package android.
+        	    但试验的结果是，在 cordova 安装 plugin 的时候，并不会更改包名，而是直接把 HelloWorld.java 拷贝到了 Cordova 的工程目录 src/org/kane/plugin,
+        	    这样就导致出错，因为 HellWorld.java package 和 它在 Cordova 工程中的路径不匹配，导致插件不能被执行。
+        	    
+        	 3. 所以，经过不断的尝试，最终形成了我目前写 plugin 的方式，"将 src/android 定义为 source folder"。
+        -->	    
+        
+    </platform>
+    
+</plugin>
